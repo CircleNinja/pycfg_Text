@@ -1,4 +1,5 @@
 import pycfg_HL2 as HL2
+import math
 
 class Letter:
     def __init__(self, cfg, name=None, size=10):
@@ -878,7 +879,7 @@ class Letter:
 
         return newPointTargetname
 
-    def ShowBeam(self, color, letterNO=None):
+    def ShowLetter(self, color, letterNO=None):
         if(letterNO == None):
             beamTargetname = "{0}{1}beam".format(self.name, self.letterNO-1)
             lastChar = HL2.Entity(self.cfg, "env_alyxemp", "{0}{1}_*".format(self.name, self.letterNO-1))
@@ -898,9 +899,15 @@ class Letter:
         lastChar.fireInput("fireuser2");
     
     def Message(self, stringIn, pos=HL2.Vec(0), ang=HL2.Vec(0), rotateOrigin=None):
-        addAng = 0
+        addAngy = 0
+        addAngz = 0
         if(rotateOrigin != None):
-            addAng = 0#maths needed here
+            if(pos.y != rotateOrigin.y):
+                addAngy += math.degrees(math.acos(1 - (math.pow(self.size, 2)/(2*math.pow(pos.y-rotateOrigin.y, 2)))))
+            if(pos.x != rotateOrigin.x):
+                addAngy += math.degrees(math.acos(1 - (math.pow(self.size, 2)/(2*math.pow(pos.x-rotateOrigin.x, 2)))))
+            if(pos.z != rotateOrigin.z):
+                addAngz += math.degrees(math.acos(1 - (math.pow(self.size, 2)/(2*math.pow(pos.z-rotateOrigin.z, 2)))))
         
         for c in stringIn:
             if ((c == "A") or (c == "a")):
@@ -994,6 +1001,9 @@ class Letter:
             elif (c == "!"):
                 self.exclamation(pos, ang)
             
+            ang.y += addAngy
+            ang.z += addAngz
+            
             newpos = HL2.Vec(0)
             newpos.add(pos)
             newpos.y += self.size
@@ -1002,3 +1012,38 @@ class Letter:
             newpos.rotate(pos, 'x', -ang.z)
             newpos.y += self.size/2 #?ez need to fix this.
             pos = newpos
+        
+    def RingOffset(self, text):
+        return ((len(text)*self.size)/(2*math.pi))
+    
+    def ShowMessage(self, colourStart, colourEnd=None, colourMid=None):
+        if(self.letterNO == 0):
+            return
+        
+        curColour = colourStart
+        colourOffset = HL2.Vec(0)
+        colourOffset2 = HL2.Vec(0)
+        if((colourMid != None) and (colourEnd != None)):
+            colourOffset.x = ((colourMid.x - colourStart.x)*100/((self.letterNO-1)//2))/100.0
+            colourOffset.y = ((colourMid.y - colourStart.y)*100/((self.letterNO-1)//2))/100.0
+            colourOffset.z = ((colourMid.z - colourStart.z)*100/((self.letterNO-1)//2))/100.0
+            colourOffset2.x = ((colourEnd.x - colourMid.x)*100/((self.letterNO-1)//2))/100.0
+            colourOffset2.y = ((colourEnd.y - colourMid.y)*100/((self.letterNO-1)//2))/100.0
+            colourOffset2.z = ((colourEnd.z - colourMid.z)*100/((self.letterNO-1)//2))/100.0
+        elif(colourEnd != None):
+            colourOffset.x = ((colourEnd.x - colourStart.x)*100/(self.letterNO-1))/100.0
+            colourOffset.y = ((colourEnd.y - colourStart.y)*100/(self.letterNO-1))/100.0
+            colourOffset.z = ((colourEnd.z - colourStart.z)*100/(self.letterNO-1))/100.0
+        
+        for i in range(0, self.letterNO, 1):
+            self.ShowLetter(curColour, i)
+            curColour.add(colourOffset)
+            if(curColour.x < 0):
+                curColour.x = 0
+            if(curColour.y < 0):
+                curColour.y = 0
+            if(curColour.z < 0):
+                curColour.z = 0
+            
+            if((colourMid != None) and (colourEnd != None) and (i == self.letterNO//2-1)):
+                colourOffset = colourOffset2

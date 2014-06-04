@@ -1000,12 +1000,14 @@ class Letter:
                 self.equals(pos, ang)
             elif (c == "!"):
                 self.exclamation(pos, ang)
+            elif (c == " "):
+                pos.y -= self.size/2 #?ez need to fix this.
             
             ang.y += addAngy
             ang.z += addAngz
             
             newpos = HL2.Vec(0)
-            newpos.add(pos)
+            newpos += pos
             newpos.y += self.size
             newpos.rotate(pos, 'y', -ang.x)
             newpos.rotate(pos, 'z', -ang.y)
@@ -1016,28 +1018,28 @@ class Letter:
     def RingOffset(self, text):
         return ((len(text)*self.size)/(2*math.pi))
     
-    def ShowMessage(self, colourStart, colourEnd=None, colourMid=None):
+    def ShowMessage(self, colour1, colour2=None, colour3=None):
         if(self.letterNO == 0):
             return
         
-        curColour = colourStart
+        curColour = colour1
         colourOffset = HL2.Vec(0)
         colourOffset2 = HL2.Vec(0)
-        if((colourMid != None) and (colourEnd != None)):
-            colourOffset.x = ((colourMid.x - colourStart.x)*100/((self.letterNO-1)//2))/100.0
-            colourOffset.y = ((colourMid.y - colourStart.y)*100/((self.letterNO-1)//2))/100.0
-            colourOffset.z = ((colourMid.z - colourStart.z)*100/((self.letterNO-1)//2))/100.0
-            colourOffset2.x = ((colourEnd.x - colourMid.x)*100/((self.letterNO-1)//2))/100.0
-            colourOffset2.y = ((colourEnd.y - colourMid.y)*100/((self.letterNO-1)//2))/100.0
-            colourOffset2.z = ((colourEnd.z - colourMid.z)*100/((self.letterNO-1)//2))/100.0
-        elif(colourEnd != None):
-            colourOffset.x = ((colourEnd.x - colourStart.x)*100/(self.letterNO-1))/100.0
-            colourOffset.y = ((colourEnd.y - colourStart.y)*100/(self.letterNO-1))/100.0
-            colourOffset.z = ((colourEnd.z - colourStart.z)*100/(self.letterNO-1))/100.0
+        if((colour2 != None) and (colour3 != None)):
+            colourOffset.x = ((colour2.x - colour1.x)*100/((self.letterNO-1)//2))/100.0
+            colourOffset.y = ((colour2.y - colour1.y)*100/((self.letterNO-1)//2))/100.0
+            colourOffset.z = ((colour2.z - colour1.z)*100/((self.letterNO-1)//2))/100.0
+            colourOffset2.x = ((colour3.x - colour2.x)*100/((self.letterNO-1)//2))/100.0
+            colourOffset2.y = ((colour3.y - colour2.y)*100/((self.letterNO-1)//2))/100.0
+            colourOffset2.z = ((colour3.z - colour2.z)*100/((self.letterNO-1)//2))/100.0
+        elif(colour2 != None):
+            colourOffset.x = ((colour2.x - colour1.x)*100/(self.letterNO-1))/100.0
+            colourOffset.y = ((colour2.y - colour1.y)*100/(self.letterNO-1))/100.0
+            colourOffset.z = ((colour2.z - colour1.z)*100/(self.letterNO-1))/100.0
         
         for i in range(0, self.letterNO, 1):
             self.ShowLetter(curColour, i)
-            curColour.add(colourOffset)
+            curColour += colourOffset
             if(curColour.x < 0):
                 curColour.x = 0
             if(curColour.y < 0):
@@ -1045,5 +1047,5 @@ class Letter:
             if(curColour.z < 0):
                 curColour.z = 0
             
-            if((colourMid != None) and (colourEnd != None) and (i == self.letterNO//2-1)):
+            if((colour2 != None) and (colour3 != None) and (i == self.letterNO//2-1)):
                 colourOffset = colourOffset2
